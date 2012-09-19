@@ -1,5 +1,5 @@
 ﻿﻿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                    RLib.NiconicoAPI.dll   ver 0.0.1.0
+                       TVTestChannelEditor   ver 0.0.1.0
 
                           Copyright© 2012 regerege  All Rights Reserved.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -31,3 +31,4 @@ regeregeが欲しい機能を少しずつ追加していきます。
 
 【変更履歴】
 　2012/09/08　ver 0.0.1.0
+  2012/09/20  ver 0.0.1.1　　WPFでGUIを作成しなおす。

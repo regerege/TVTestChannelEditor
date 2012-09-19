@@ -72,47 +72,6 @@ type ChannelInfo(channelName,tunerID,transportID,remoteControlNumber,serviceID,n
             _enabled <- v
             x.OnPropertyChanged(<@ x.Enabled @>)
 
-type ChannelInfo2 =
-    {
-        /// チャンネル名の取得または設定
-        mutable ChannelName : string
-        /// チューナ番号の取得または設定
-        mutable TunerID : int
-        /// トランスポートIDの取得または設定
-        mutable TransportID : int
-        /// リモコン番号の取得または設定
-        mutable RemoteControlNumber : int
-        /// サービスIDの取得または設定
-        mutable ServiceID : int
-        /// ネットワークIDの取得または設定
-        mutable NetworkID : int
-        /// トランスポートストリームIDの取得または設定
-        mutable TransportStreamID : int
-        /// チャンネルの有効または無効を取得または設定
-        mutable Enabled : bool
-    }
-    member x.ToListItems() =
-        [|
-            x.ChannelName
-            sprintf "%A" x.TunerID
-            sprintf "%A" x.TransportID
-            sprintf "%A" x.RemoteControlNumber
-            sprintf "%A" x.ServiceID
-            sprintf "%A" x.NetworkID
-            sprintf "%A" x.TransportStreamID
-        |]
-    static member Create(enable,name,tunerid,tpid,rcnum,serviceid,netid,tsid) : ChannelInfo2 =
-        {
-            ChannelName = name
-            TunerID = tunerid
-            TransportID = tpid
-            RemoteControlNumber = rcnum
-            ServiceID = serviceid
-            NetworkID = netid
-            TransportStreamID = tsid
-            Enabled = enable
-        }
-
 /// チューナ情報
 type TunerInfo =
     {
