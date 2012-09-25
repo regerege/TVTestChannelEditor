@@ -20,32 +20,48 @@ namespace TVTestChannelEditorWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        public List<TunerInfo> Tuner { get; private set; }
+        public TunerList Tuner { get; private set; }
 
         public MainWindow()
         {
-            this.Tuner = new List<TunerInfo>
-            {
-                TunerInfo.CreateTestData()
-            };
+            this.Tuner = TunerList.ReadConfig(@"..\..\..\BonDriver_ptmr.ch2");
 
             InitializeComponent();
 
-            this.gridChannles.ItemsSource = this.Tuner[0].Channels;
-            this.gridChannles.SelectedCellsChanged +=
-                (sender, e) =>
-                {
-                    this.editPanel.DataContext = null;
-                    if (0 < e.AddedCells.Count)
-                    {
-                        var item = e.AddedCells[0];
-                        var info = item.Item as ChannelInfo;
-                        if (info != null)
-                        {
-                            this.editPanel.DataContext = info;
-                        }
-                    }
-                };
+            this.tabTuner.ItemsSource = this.Tuner.Tuners;
+            ////this.gridChannles.ItemsSource = this.Tuner[0].Channels;
+            //this.tabTuner.SelectionChanged +=
+            //    (sender, e) =>
+            //    {
+            //        if (0 < e.AddedItems.Count)
+            //        {
+            //        }
+            //    };
+            //this.gridChannles.SelectedCellsChanged +=
+            //    (sender, e) =>
+            //    {
+            //        this.editPanel.DataContext = null;
+            //        if (0 < e.AddedCells.Count)
+            //        {
+            //            var item = e.AddedCells[0];
+            //            var info = item.Item as ChannelInfo;
+            //            if (info != null)
+            //            {
+            //                this.editPanel.DataContext = info;
+            //            }
+            //        }
+            //    };
+        }
+
+        private void StatusBar_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            System.Diagnostics.Debugger.Break();
+        }
+
+        private void gridChannels_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
+            //var item = sender as DataGrid;
+            //this.editPanel.DataContext = item.SelectedItem;
         }
     }
 }

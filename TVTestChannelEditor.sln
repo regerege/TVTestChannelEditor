@@ -5,6 +5,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TVTestChannelEditor", "TVTe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{03B3120B-D9A4-40FB-9A6B-77F46D6629E9}"
 	ProjectSection(SolutionItems) = preProject
+		BonDriver_ptmr.ch2 = BonDriver_ptmr.ch2
 		README.md = README.md
 	EndProjectSection
 EndProject

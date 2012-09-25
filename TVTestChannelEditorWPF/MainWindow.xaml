@@ -44,65 +44,76 @@
             </MenuItem>
         </Menu>
         <!-- ステータスバー -->
-        <StatusBar HorizontalAlignment="Stretch" VerticalAlignment="Bottom" DockPanel.Dock="Bottom" Height="23">
-            <TextBlock Name="txtStatus"></TextBlock>
+        <StatusBar HorizontalAlignment="Stretch" VerticalAlignment="Bottom" DockPanel.Dock="Bottom" Height="23" MouseDoubleClick="StatusBar_MouseDoubleClick">
+            <TextBlock Name="txtStatus"
+                Text="{Binding RelativeSource={RelativeSource Mode=PreviousData}, Path=Name}" />
         </StatusBar>
         <!-- 縦方向の3カラムデザイン（中央） -->
-        <Grid>
+        <Grid Name="gridCenter">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition Width="7.5" />
                 <ColumnDefinition Width="350" />
             </Grid.ColumnDefinitions>
             <!-- 左側の表 -->
-            <TabControl Grid.Column="0">
-                <TabItem Header="S0" Name="tabChannelS0">
-                    <DataGrid
-                        Name="gridChannles"
-                        HorizontalAlignment="Stretch"
-                        Grid.Row="0"
-                        AutoGenerateColumns="False"
-                        SelectionMode="Single">
-                        <DataGrid.Columns>
-                            <DataGridCheckBoxColumn
+            <TabControl Grid.Column="0" Name="tabTuner">
+                <TabControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Path=TunerName}" />
+                    </DataTemplate>
+                </TabControl.ItemTemplate>
+                <TabControl.ContentTemplate>
+                    <DataTemplate>
+                        <DataGrid
+                                Name="gridChannels"
+                                HorizontalAlignment="Stretch"
+                                Grid.Row="0"
+                                AutoGenerateColumns="False"
+                                SelectionMode="Single"
+                                ItemsSource="{Binding Path=Channels}"
+                                IsSynchronizedWithCurrentItem="True"
+                                SelectedCellsChanged="gridChannels_SelectedCellsChanged">
+                            <DataGrid.Columns>
+                                <DataGridCheckBoxColumn
                                     Header="表示" Binding="{Binding Path=Enabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Width="35" />
-                            <DataGridTextColumn
+                                <DataGridTextColumn
                                     HeaderStyle="{StaticResource _colCenter}"
                                     IsReadOnly="True"
                                     Header="番組名" Binding="{Binding Path=ChannelName}" Width="*" />
-                            <DataGridTextColumn
+                                <DataGridTextColumn
                                     HeaderStyle="{StaticResource _colCenter}"
                                     ElementStyle="{StaticResource _colTextRight}"
                                     IsReadOnly="True"
                                     Header="チューナ空間" Binding="{Binding Path=TunerID}" Width="85" />
-                            <DataGridTextColumn
+                                <DataGridTextColumn
                                     HeaderStyle="{StaticResource _colCenter}"
                                     ElementStyle="{StaticResource _colTextRight}"
                                     IsReadOnly="True"
                                     Header="TPID" Binding="{Binding Path=TransportID}" Width="65" />
-                            <DataGridTextColumn
+                                <DataGridTextColumn
                                     HeaderStyle="{StaticResource _colCenter}"
                                     ElementStyle="{StaticResource _colTextRight}"
                                     IsReadOnly="True"
                                     Header="リモコン番号" Binding="{Binding Path=RemoteControlNumber}" Width="80" />
-                            <DataGridTextColumn
+                                <DataGridTextColumn
                                     HeaderStyle="{StaticResource _colCenter}"
                                     ElementStyle="{StaticResource _colTextRight}"
                                     IsReadOnly="True"
                                     Header="サービスID" Binding="{Binding Path=ServiceID}" Width="65" />
-                            <DataGridTextColumn
+                                <DataGridTextColumn
                                     HeaderStyle="{StaticResource _colCenter}"
                                     ElementStyle="{StaticResource _colTextRight}"
                                     IsReadOnly="True"
                                     Header="ネットワークID" Binding="{Binding Path=NetworkID}" Width="65" />
-                            <DataGridTextColumn
+                                <DataGridTextColumn
                                     HeaderStyle="{StaticResource _colCenter}"
                                     ElementStyle="{StaticResource _colTextRight}"
                                     IsReadOnly="True"
                                     Header="TSID" Binding="{Binding Path=TransportStreamID}" Width="65" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </TabItem>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DataTemplate>
+                </TabControl.ContentTemplate>
             </TabControl>
             <!-- 中央スプリッター -->
             <GridSplitter Name="splitter" HorizontalAlignment="Stretch" VerticalContentAlignment="Stretch" Grid.Column="1">
@@ -138,7 +149,8 @@
             </GridSplitter>
             <!-- 右側の編集用パネル -->
             <GroupBox Header="チャンネル編集" Margin="5" Grid.Column="2">
-                <StackPanel Name="editPanel">
+                <StackPanel Name="editPanel"
+                    DataContext="{Binding RelativeSource={RelativeSource Mode=PreviousData}, Path=SelectedItem}">
                     <DockPanel Margin="0,0,0,15">
                         <TextBlock VerticalAlignment="Center" Width="100" Margin="0,0,10,0" TextAlignment="Center" Text="番組名"></TextBlock>
                         <TextBox Text="{Binding ChannelName}" Name="txtChannelName" />
