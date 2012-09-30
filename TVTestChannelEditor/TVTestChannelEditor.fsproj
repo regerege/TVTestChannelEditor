@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{425690b3-13d6-4136-826f-e98f907cca9c}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>WinExe</OutputType>
     <RootNamespace>TVTestChannelEditor</RootNamespace>
     <AssemblyName>TVTestChannelEditor</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
@@ -41,14 +41,27 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Commons.fs" />
     <Compile Include="TunerInfo.fs" />
+    <Compile Include="Program.fs" />
     <None Include="TVTestChannelEditor.snk" />
+    <Resource Include="ChannelEditor.xaml" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Accessibility" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="PresentationUI" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UIAutomationProvider" />
+    <Reference Include="UIAutomationTypes" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
 	     Other similar extension points exist, see Microsoft.Common.targets.

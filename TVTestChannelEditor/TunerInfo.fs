@@ -1,6 +1,7 @@
 ﻿namespace TVTestChannelEditor
 
 open System
+open System.Collections.ObjectModel
 open System.IO
 open System.Text
 open System.Text.RegularExpressions
@@ -26,7 +27,7 @@ type ChannelInfo(channelName,tunerID,transportID,remoteControlNumber,serviceID,n
     let mutable _networkID : int = networkID
     let mutable _transportStreamID : int = transportStreamID
     let mutable _enabled : bool = enabled
-    
+
     /// チャンネル名の取得または設定
     member x.ChannelName
         with get() = _channelName
@@ -77,14 +78,25 @@ type ChannelInfo(channelName,tunerID,transportID,remoteControlNumber,serviceID,n
             x.OnPropertyChanged(<@ x.Enabled @>)
 
 /// チューナ情報
-type TunerInfo =
-    {
-        /// チューナ番号
-        mutable TunerName : string
-        /// チューナに結びつくチャンネル一覧
-        mutable Channels : ResizeArray<ChannelInfo>
-//        ObservableCollection
-    }
+type TunerInfo(tunerName) =
+    inherit ViewModelBase()
+
+    let mutable _tunerName : string = tunerName
+    let mutable _channels = new ObservableCollection<ChannelInfo>()
+    
+    /// チューナー名の取得または設定
+    member x.TunerName
+        with get() = _tunerName
+        and set v =
+            _tunerName <- v
+            x.OnPropertyChanged(<@ x.TunerName @>)
+    /// チャンネルリストの取得または設定
+    member x.Channels
+        with get() = _channels
+        and set v =
+            _channels <- v
+            x.OnPropertyChanged(<@ x.Channels @>)
+    /// チャンネルすべてのチューナーIDを一括を行う。
     member x.ChangeTunerNumber id =
         for c in x.Channels do c.TunerID <- id
 
@@ -113,14 +125,14 @@ module TunerCommons =
 
 /// チューナーリスト
 type TunerList() =
-    let mutable _list = new ResizeArray<TunerInfo>()
+    let mutable _list = new ObservableCollection<TunerInfo>()
     let mutable _tuner : TunerInfo option = None
     /// チューナー一覧を取得
     member x.Tuners
         with get() = _list
     /// チューナーを追加する。
     member x.AddTuner(name) =
-        _tuner <- Some { TunerName = name; Channels = new ResizeArray<ChannelInfo>() }
+        _tuner <- Some <| TunerInfo(name)
         if _tuner.IsSome then
             _list.Add _tuner.Value
     /// 現在選択中のチューナーにチャンネルを追加する。
@@ -152,3 +164,4 @@ type TunerList() =
         with
         | ex ->
             failwith "設定ファイルの読み込みに失敗しました。"
+

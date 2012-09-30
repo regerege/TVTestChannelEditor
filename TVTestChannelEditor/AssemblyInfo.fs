@@ -15,7 +15,7 @@ open System.Runtime.InteropServices
 [<assembly: AssemblyProduct("TVTestChannelEditor")>]
 [<assembly: AssemblyCopyright("Copyright© 2012 regerege  All Rights Reserved.")>]
 [<assembly: AssemblyTrademark("")>]
-[<assembly: AssemblyCulture("")>]
+//[<assembly: AssemblyCulture("")>]
 
 [<assembly: ComVisible(false)>] 
 
