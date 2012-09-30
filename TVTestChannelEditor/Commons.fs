@@ -2,6 +2,7 @@
 open System
 open System.Collections.ObjectModel
 open System.ComponentModel
+open System.Text
 open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Quotations.Patterns
 
@@ -25,3 +26,16 @@ type ViewModelBase() =
         expr
         |> toPropName
         |> x.OnPropertyChanged
+
+/// 共通モジュール
+module Commons =
+    /// Shift-JISエンコーディング
+    let SJIS = Encoding.GetEncoding(932)
+    /// ICommandオブジェクトを作成する。
+    let CreateCommand canExecute action =
+        let event = Event<_,_>()
+        { new System.Windows.Input.ICommand with
+            member x.CanExecute obj = canExecute obj
+            member x.Execute obj = action obj
+            [<CLIEvent>]
+            member x.CanExecuteChanged = event.Publish }

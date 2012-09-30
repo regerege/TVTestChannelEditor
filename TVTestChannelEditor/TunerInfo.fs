@@ -5,6 +5,7 @@ open System.Collections.ObjectModel
 open System.IO
 open System.Text
 open System.Text.RegularExpressions
+open Commons
 
 /// チャンネル情報
 /// <summary>チャンネル情報</summary>
@@ -76,6 +77,16 @@ type ChannelInfo(channelName,tunerID,transportID,remoteControlNumber,serviceID,n
         and set(v) =
             _enabled <- v
             x.OnPropertyChanged(<@ x.Enabled @>)
+    override x.ToString() =
+        sprintf "%s,%d,%d,%d,,%d,%d,%d,%d"
+            <| _channelName
+            <| _tunerID
+            <| _transportID
+            <| _remoteControlNumber
+            <| _serviceID
+            <| _networkID
+            <| _transportStreamID
+            <| (if _enabled then 1 else 0)
 
 /// チューナ情報
 type TunerInfo(tunerName) =
@@ -122,11 +133,19 @@ module TunerCommons =
                     , enabled = (channel.[8] = "1")
                 ))
         else NoneLine
+    /// 設定情報シーケンス
+    let read (path:string) f =
+        use file = new StreamReader(path, SJIS)
+        seq {
+            while not(file.EndOfStream) do
+                yield file.ReadLine()
+        } |> f
 
 /// チューナーリスト
 type TunerList() =
     let mutable _list = new ObservableCollection<TunerInfo>()
     let mutable _tuner : TunerInfo option = None
+    let mutable _path : string = ""
     /// チューナー一覧を取得
     member x.Tuners
         with get() = _list
@@ -138,30 +157,70 @@ type TunerList() =
     /// 現在選択中のチューナーにチャンネルを追加する。
     member x.Add (info : ChannelInfo) =
         _tuner.Value.Channels.Add info
+    /// インデクサの定義
     member x.Item
         with get i = _list.[i]
         and set i v = _list.[i] <- v
 
+    /// オリジナルファイルの取得または設定
+    member x.OriginalPath
+        with get() = _path
+        and set v = _path <- v
+    /// 設定ファイルのディレクトリを取得する。
+    member x.BasePath
+        with get() = Path.GetDirectoryName(_path)
+
+    /// 設定情報を保存する。
+    member x.Save(path:string) =
+        let path =
+            if String.IsNullOrEmpty path then x.OriginalPath
+            else Path.GetFullPath(path)
+        let _ = File.Exists path    // チェック処理として使える？
+        let temppath = Path.Combine(x.BasePath, "temp.ch2")
+        let readFile path = new StreamWriter(path, false, SJIS)
+        try
+            use file = readFile temppath
+            TunerCommons.read x.OriginalPath
+                <| (fun s ->
+                    s |> Seq.fold (fun index (line:string) ->
+                        match line with
+                        | TunerCommons.ChannelLine ci -> index
+                        | TunerCommons.TunerLine (index, th) ->
+                            let tuner = x.Tuners.[index]
+                            // SPACEを出力
+                            file.WriteLine(sprintf ";#SPACE(%d,%s)" index tuner.TunerName)
+                            // チャンネルの一括出力
+                            Seq.iter(fun info -> file.WriteLine(info.ToString())) tuner.Channels
+                            index
+                        | _ ->
+                            // その他の出力
+                            file.WriteLine(line)
+                            index
+                    ) -1) |> ignore
+        with
+        | ex ->
+            failwith "設定ファイルの書き込みに失敗しました。"
+        try
+            File.Copy(temppath, path, true)
+            File.Delete temppath
+        with
+        | _ -> ()
     /// 設定ファイルを読み込む
     static member ReadConfig(path:string) =
         try
-            use file = new StreamReader(path, Encoding.GetEncoding(932))
             let init = new TunerList()
-            let ioSeq =
-                seq {
-                    while not(file.EndOfStream) do
-                        yield file.ReadLine()
-                }
-            ioSeq |> Seq.fold (fun (tuners:TunerList) line ->
-                match line with
-                | TunerCommons.TunerLine (index, tn) ->
-                    tuners.AddTuner tn
-                | TunerCommons.ChannelLine ci ->
-                    tuners.Add ci
-                | _ -> ()
-                tuners
-            ) init
+            init.OriginalPath <- Path.GetFullPath(path)
+            TunerCommons.read path
+                <| (fun s ->
+                    s |> Seq.fold (fun (tuners:TunerList) line ->
+                        match line with
+                        | TunerCommons.TunerLine (index, tn) ->
+                            tuners.AddTuner tn
+                        | TunerCommons.ChannelLine ci ->
+                            tuners.Add ci
+                        | _ -> ()
+                        tuners
+                    ) init)
         with
         | ex ->
             failwith "設定ファイルの読み込みに失敗しました。"
-
