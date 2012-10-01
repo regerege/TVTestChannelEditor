@@ -184,6 +184,7 @@ type TunerList() =
                 <| (fun s ->
                     s |> Seq.fold (fun index (line:string) ->
                         match line with
+                        // チャンネルは出力しない
                         | TunerCommons.ChannelLine ci -> index
                         | TunerCommons.TunerLine (index, th) ->
                             let tuner = x.Tuners.[index]
@@ -200,7 +201,10 @@ type TunerList() =
         with
         | ex ->
             failwith "設定ファイルの書き込みに失敗しました。"
-        try
+        try // ↓超ださい
+            let bkpath = path + ".bak"
+            if File.Exists bkpath then File.Delete bkpath
+            File.Move(path, bkpath)
             File.Copy(temppath, path, true)
             File.Delete temppath
         with
@@ -224,3 +228,4 @@ type TunerList() =
         with
         | ex ->
             failwith "設定ファイルの読み込みに失敗しました。"
+

@@ -3,6 +3,9 @@ open System
 open System.Collections.ObjectModel
 open System.ComponentModel
 open System.Text
+open System.Windows
+open System.Windows.Controls
+open System.Windows.Media
 open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Quotations.Patterns
 
@@ -39,3 +42,15 @@ module Commons =
             member x.Execute obj = action obj
             [<CLIEvent>]
             member x.CanExecuteChanged = event.Publish }
+    /// ビジュアルツリーの子要素を検索する
+    let GetChildElement (parent:DependencyObject) (t:Type) =
+        let rec sf p =
+            let c = VisualTreeHelper.GetChildrenCount(p)
+            if p.GetType() = t || c <= 0 then Seq.singleton p
+            else
+                Seq.init c ((+)0)
+                |> Seq.map (fun i -> VisualTreeHelper.GetChild(p,i))
+                |> Seq.collect sf
+        sf <| parent
+        |> Seq.tryFind(fun e -> e.GetType() = t)
+

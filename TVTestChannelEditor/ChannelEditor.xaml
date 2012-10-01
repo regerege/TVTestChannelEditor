@@ -31,7 +31,12 @@
                 SelectedItem="{
                     Binding Path=DataContext.SelectedChannel,
                     Mode=TwoWay,
-                    RelativeSource={RelativeSource AncestorType=Window}}">
+                    RelativeSource={RelativeSource AncestorType=Window}}"
+                SelectedIndex="{
+                    Binding Path=DataContext.SelectedIndex,
+                    Mode=TwoWay,
+                    RelativeSource={RelativeSource AncestorType=Window}}"
+                >
                 <DataGrid.Columns>
                     <DataGridCheckBoxColumn
                         Header="表示" Width="35"
@@ -85,12 +90,25 @@
         </DataTemplate>
     </Window.Resources>
 
+    <!-- ショートカットキー -->
+    <Window.InputBindings>
+        <!-- 保存 -->
+        <KeyBinding Gesture="Ctrl+S" Command="{Binding KeyCommand}" CommandParameter="Ctrl+S" />
+        <!-- Grid選択アイテムの上移動 -->
+        <KeyBinding Gesture="Alt+K" Command="{Binding KeyCommand}" CommandParameter="Alt+K" />
+        <!-- Grid選択アイテムの下移動 -->
+        <KeyBinding Gesture="Alt+J" Command="{Binding KeyCommand}" CommandParameter="Alt+J" />
+    </Window.InputBindings>
+
     <!-- 画面 -->
     <DockPanel>
         <!-- メニュー -->
-        <Menu Name="menu1" HorizontalAlignment="Stretch" VerticalAlignment="Top" DockPanel.Dock="Top" Height="23">
+        <Menu Name="mainMenu" HorizontalAlignment="Stretch" VerticalAlignment="Top" DockPanel.Dock="Top" Height="23">
             <MenuItem Header="_File">
-                <MenuItem Header="_Save" Command="{Binding SaveCommand}" />
+                <MenuItem Header="_Save"
+                          InputGestureText="Ctrl+S"
+                          Command="{Binding KeyCommand}"
+                          CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InputGestureText}" />
                 <MenuItem Header="_Close" />
             </MenuItem>
             <MenuItem Header="_Edit">
@@ -117,10 +135,10 @@
         <!-- 縦方向の3カラムデザイン（中央） -->
         <Grid Name="gridCenter">
             <Grid.ColumnDefinitions>
-        <ColumnDefinition />
-        <ColumnDefinition Width="7.5" />
-        <ColumnDefinition Width="350" />
-      </Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="7.5" />
+                <ColumnDefinition Width="350" />
+            </Grid.ColumnDefinitions>
             <!-- 左側の表 -->
             <TabControl Grid.Column="0" Name="tabTuner" ItemsSource="{Binding Tuners}" SelectedIndex="0">
                 <TabControl.ItemContainerStyle>
@@ -192,3 +210,4 @@
         </Grid>
     </DockPanel>
 </Window>
+
