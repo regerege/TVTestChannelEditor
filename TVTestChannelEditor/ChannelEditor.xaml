@@ -98,6 +98,27 @@
         <KeyBinding Gesture="Alt+K" Command="{Binding KeyCommand}" CommandParameter="Alt+K" />
         <!-- Grid選択アイテムの下移動 -->
         <KeyBinding Gesture="Alt+J" Command="{Binding KeyCommand}" CommandParameter="Alt+J" />
+        <!-- タブの切り替え← -->
+        <KeyBinding Gesture="Ctrl+PageUp" Command="{Binding KeyCommand}" CommandParameter="Ctrl+PageUp" />
+        <KeyBinding Gesture="Ctrl+Shift+F6" Command="{Binding KeyCommand}" CommandParameter="Ctrl+Shift+F6" />
+        <KeyBinding Gesture="Ctrl+Shift+Tab" Command="{Binding KeyCommand}" CommandParameter="Ctrl+Shift+Tab" />
+        <KeyBinding Gesture="Alt+H" Command="{Binding KeyCommand}" CommandParameter="Alt+H" />
+        <!-- タブの切り替え→ -->
+        <KeyBinding Gesture="Ctrl+PageDown" Command="{Binding KeyCommand}" CommandParameter="Ctrl+PageDown" />
+        <KeyBinding Gesture="Ctrl+F6" Command="{Binding KeyCommand}" CommandParameter="Ctrl+F6" />
+        <KeyBinding Gesture="Ctrl+Tab" Command="{Binding KeyCommand}" CommandParameter="Ctrl+Tab" />
+        <KeyBinding Gesture="Alt+L" Command="{Binding KeyCommand}" CommandParameter="Alt+L" />
+        <!-- 各項目の選択 -->
+        <KeyBinding Gesture="Alt+1" Command="{Binding SelectedEditControlCommand}" CommandParameter="Alt+1" />
+        <KeyBinding Gesture="Alt+2" Command="{Binding SelectedEditControlCommand}" CommandParameter="Alt+2" />
+        <KeyBinding Gesture="Alt+3" Command="{Binding SelectedEditControlCommand}" CommandParameter="Alt+3" />
+        <KeyBinding Gesture="Alt+4" Command="{Binding SelectedEditControlCommand}" CommandParameter="Alt+4" />
+        <KeyBinding Gesture="Alt+5" Command="{Binding SelectedEditControlCommand}" CommandParameter="Alt+5" />
+        <KeyBinding Gesture="Alt+6" Command="{Binding SelectedEditControlCommand}" CommandParameter="Alt+6" />
+        <KeyBinding Gesture="Alt+7" Command="{Binding SelectedEditControlCommand}" CommandParameter="Alt+7" />
+        <KeyBinding Gesture="Alt+8" Command="{Binding SelectedEditControlCommand}" CommandParameter="Alt+8" />
+        <!-- 編集系 -->
+        <KeyBinding Gesture="Ctrl+Alt+C" Command="{Binding KeyCommand}" CommandParameter="Ctrl+Alt+C" />
     </Window.InputBindings>
 
     <!-- 画面 -->
@@ -123,7 +144,10 @@
                     <MenuItem Header="_Add bottom" />
                     <MenuItem Header="_Delete Select" />
                     <Separator />
-                    <MenuItem Header="_Copy Channels" />
+                    <MenuItem Header="_Copy Write Channels"
+                          InputGestureText="Ctrl+Alt+C"
+                          Command="{Binding KeyCommand}"
+                          CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InputGestureText}" />
                     <MenuItem Header="_Marge Channels" />
                 </MenuItem>
             </MenuItem>
@@ -140,7 +164,7 @@
                 <ColumnDefinition Width="350" />
             </Grid.ColumnDefinitions>
             <!-- 左側の表 -->
-            <TabControl Grid.Column="0" Name="tabTuner" ItemsSource="{Binding Tuners}" SelectedIndex="0">
+            <TabControl Grid.Column="0" Name="tabTuner" ItemsSource="{Binding Tuners}" SelectedIndex="{Binding SelectedTabIndex}">
                 <TabControl.ItemContainerStyle>
                     <Style TargetType="TabItem">
                         <Setter Property="Header" Value="{Binding TunerName}" />
@@ -179,31 +203,31 @@
                     </DockPanel>
                     <DockPanel Margin="0,0,0,15">
                         <TextBlock Margin="0,0,10,0" TextAlignment="Center" VerticalAlignment="Center" Width="100" Text="チューナ空間"></TextBlock>
-                        <TextBox Text="{Binding TunerID, StringFormat=F0, Mode=TwoWay}" />
+                        <TextBox Text="{Binding TunerID, StringFormat=F0, Mode=TwoWay}" Name="txtTuner" />
                     </DockPanel>
                     <DockPanel Margin="0,0,0,15">
                         <TextBlock Margin="0,0,10,0" TextAlignment="Center" VerticalAlignment="Center" Width="100" Text="TPID"></TextBlock>
-                        <TextBox Text="{Binding TransportID, Mode=TwoWay}" />
+                        <TextBox Text="{Binding TransportID, Mode=TwoWay}" Name="txtTPID" />
                     </DockPanel>
                     <DockPanel Margin="0,0,0,15">
                         <TextBlock Margin="0,0,10,0" TextAlignment="Center" VerticalAlignment="Center" Width="100" Text="リモコン番号"></TextBlock>
-                        <TextBox Text="{Binding RemoteControlNumber, Mode=TwoWay}" />
+                        <TextBox Text="{Binding RemoteControlNumber, Mode=TwoWay}" Name="txtRCNM" />
                     </DockPanel>
                     <DockPanel Margin="0,0,0,15">
                         <TextBlock Margin="0,0,10,0" TextAlignment="Center" VerticalAlignment="Center" Width="100" Text="サービスID"></TextBlock>
-                        <TextBox Text="{Binding ServiceID, Mode=TwoWay}"/>
+                        <TextBox Text="{Binding ServiceID, Mode=TwoWay}" Name="txtServiceID" />
                     </DockPanel>
                     <DockPanel Margin="0,0,0,15">
                         <TextBlock Margin="0,0,10,0" TextAlignment="Center" VerticalAlignment="Center" Width="100" Text="ネットワークID"></TextBlock>
-                        <TextBox Text="{Binding NetworkID, Mode=TwoWay}" />
+                        <TextBox Text="{Binding NetworkID, Mode=TwoWay}" Name="txtNetworkID" />
                     </DockPanel>
                     <DockPanel Margin="0,0,0,15">
                         <TextBlock Margin="0,0,10,0" TextAlignment="Center" VerticalAlignment="Center" Width="100" Text="TSID"></TextBlock>
-                        <TextBox Text="{Binding TransportStreamID, Mode=TwoWay}" />
+                        <TextBox Text="{Binding TransportStreamID, Mode=TwoWay}" Name="txtTSID" />
                     </DockPanel>
                     <DockPanel Margin="0,0,0,15">
                         <TextBlock Margin="0,0,10,0" TextAlignment="Center" VerticalAlignment="Center" Width="100" Text="表示/非表示"></TextBlock>
-                        <CheckBox IsChecked="{Binding Enabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                        <CheckBox IsChecked="{Binding Enabled, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Name="chkEnabled" />
                     </DockPanel>
                 </StackPanel>
           </GroupBox>

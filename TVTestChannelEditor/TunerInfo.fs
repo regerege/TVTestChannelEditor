@@ -77,6 +77,17 @@ type ChannelInfo(channelName,tunerID,transportID,remoteControlNumber,serviceID,n
         and set(v) =
             _enabled <- v
             x.OnPropertyChanged(<@ x.Enabled @>)
+    /// 複製を作成する。
+    member x.CopyTo(index:int) =
+        new ChannelInfo(
+            x.ChannelName,
+            index,
+            x.TransportID,
+            x.RemoteControlNumber,
+            x.ServiceID,
+            x.NetworkID,
+            x.TransportStreamID,
+            x.Enabled)
     override x.ToString() =
         sprintf "%s,%d,%d,%d,,%d,%d,%d,%d"
             <| _channelName
@@ -110,6 +121,13 @@ type TunerInfo(tunerName) =
     /// チャンネルすべてのチューナーIDを一括を行う。
     member x.ChangeTunerNumber id =
         for c in x.Channels do c.TunerID <- id
+
+    /// 指定チューナへのチャンネルリストの複製上書きを行う
+    member x.CopyWriteChannels(tt:TunerInfo, index) =
+        if x.TunerName = tt.TunerName then failwith "同一チューナーにチャンネルをコピー出来ません。"
+        let arr = Array.init (x.Channels.Count) (fun i -> x.Channels.[i].CopyTo(index))
+        let c = ObservableCollection<ChannelInfo>(arr)
+        tt.Channels <- c
 
 /// チューナー用ライブラリ
 module TunerCommons =
