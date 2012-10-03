@@ -17,7 +17,7 @@ type ChannelEditorModel(wpf:Window) as x =
     let mutable _tuners = TunerList.ReadConfig(@"..\..\BonDriver_ptmr.ch2")
     let mutable _selectedTabIndex = -1
     let mutable _selectedIndex = -1
-    let mutable _selectedChannle = ChannelInfo("",0,0,0,0,0,0,false)
+    let mutable _selectedChannle = ChannelInfo.Create()
 
     // コントロール
     let _tabTuner = wpf.FindName("tabTuner") :?> TabControl
@@ -74,30 +74,57 @@ type ChannelEditorModel(wpf:Window) as x =
     member x.KeyCommand =
         Commons.CreateCommand (fun _ -> true)
             (fun o ->
-                let m = _tabTuner.Items.Count - 1
-                let i = x.SelectedTabIndex
                 let gt = o :?> string
                 match gt with
                 | "Ctrl+S" -> _tuners.Save("test.ch2")
-                | "Alt+K"
-                | "Alt+J" ->
-                    let i = _editGrid.SelectedIndex
-                    _editGrid.SelectedIndex <-
-                        if gt = "Alt+K" then
-                            if i <= 0 then 0 else i - 1
-                        else
-                            let m = _editGrid.Items.Count - 1
-                            if m <= i then m else i + 1
-                    _editGrid.ScrollIntoView(_editGrid.SelectedItem)
-                | "Alt+H" | "Ctrl+PageUp" | "Ctrl+Shift+F6" | "Ctrl+Shift+Tab" ->
-                    x.SelectedTabIndex <- if i <= 0 then m else i - 1
-                | "Alt+L" | "Ctrl+PageDown" | "Ctrl+F6" | "Ctrl+Tab" ->
-                    x.SelectedTabIndex <- if m <= i then 0 else i + 1
                 | "Ctrl+Alt+C" ->
+                    let f = x.SelectedTabIndex
+                    //画面に渡すパラメータ
+                    //"([S|T])(\d+)" これでマッチして、(index, tunername) のリストを渡す？
+//                    let t = //画面作成後(複数選択可能)
                     x.Tuners.[0].CopyWriteChannels(x.Tuners.[2], 2)
                     x.SelectedTabIndex <- 2
                 | _ -> ())
-    /// ウィンドウコマンド（エディット編）
+    /// チャンネルの追加と削除と移動
+    member x.ChannelCommand =
+        Commons.CreateCommand (fun _ -> true)
+            (fun o ->
+                let tabindex = x.SelectedTabIndex
+                let index = x.SelectedIndex
+                let info = ChannelInfo.Create()
+                let channels = _tuners.Tuners.[tabindex].Channels
+                (o :?> string) |> (function
+                    | "Ctrl+Shift+K" -> channels.Insert(index, info)
+                    | "Ctrl+Shift+J" -> channels.Insert(index + 1, info)
+                    | "Ctrl+Shift+D" -> channels.RemoveAt(index)
+                    | _ -> ()))
+    /// 選択タブ変更コマンド
+    member x.TunerSelectedMoveCommand =
+        Commons.CreateCommand (fun _ -> true)
+            (fun o ->
+                let m = _tabTuner.Items.Count - 1
+                let i = x.SelectedTabIndex
+                (o :?> string) |> (function
+                    | "Alt+H" | "Ctrl+PageUp" | "Ctrl+Shift+F6" | "Ctrl+Shift+Tab" ->
+                        if i <= 0 then m else i - 1
+                    | "Alt+L" | "Ctrl+PageDown" | "Ctrl+F6" | "Ctrl+Tab" ->
+                        if m <= i then 0 else i + 1
+                    | _ -> 0)
+                |> (fun i -> x.SelectedTabIndex <- i)
+                _editGrid.ScrollIntoView(_editGrid.SelectedItem))
+    /// 選択チャンネル変更コマンド
+    member x.ChannelSelectedMoveCommand =
+        Commons.CreateCommand (fun _ -> true)
+            (fun o ->
+                let m = _editGrid.Items.Count - 1
+                let i = _editGrid.SelectedIndex
+                (o :?> string) |> (function
+                    | "Alt+K" -> if i <= 0 then 0 else i - 1
+                    | "Alt+J" -> if m <= i then m else i + 1
+                    | _ -> 0)
+                |> (fun i -> _editGrid.SelectedIndex <- i)
+                _editGrid.ScrollIntoView(_editGrid.SelectedItem))
+    /// 入力項目のフォーカス変更
     member x.SelectedEditControlCommand =
         Commons.CreateCommand (fun _ -> true)
             (fun o ->
@@ -106,10 +133,29 @@ type ChannelEditorModel(wpf:Window) as x =
                 if gt.StartsWith("Alt+") && t.Length = 1 then
                     _editControls.[(int t) - 1].Focus() |> ignore)
 
+/// コピー先チューナー選択画面
+type SelectionTunerModel(tuners:TunerList, selectTuner:TunerInfo) =
+    inherit ViewModelBase()
+
+    let _wpf = Application.LoadComponent(new Uri("SelectionTuner.xaml", System.UriKind.Relative)) :?> Window
+    let _lvi = _wpf.FindName("livTuners") :?> ListView
+    let _button = _wpf.FindName("btnSelected") :?> Button
+
+    do
+        let name = selectTuner.TunerName
+        let tunerType = name.[0]
+        let list =
+            tuners.Tuners
+            |> Seq.filter(fun t -> t <> selectTuner && t.TunerName.[0] = tunerType)
+            |> Seq.toArray
+        _lvi.ItemsSource <- list
+
+
 module Program =
     [<STAThread>]
     [<EntryPoint>]
     let run(_) =
+
         // TextBoxがフォーカスを受け取ると全選択する
         EventManager.RegisterClassHandler(
             typeof<TextBox>,

@@ -95,19 +95,19 @@
         <!-- 保存 -->
         <KeyBinding Gesture="Ctrl+S" Command="{Binding KeyCommand}" CommandParameter="Ctrl+S" />
         <!-- Grid選択アイテムの上移動 -->
-        <KeyBinding Gesture="Alt+K" Command="{Binding KeyCommand}" CommandParameter="Alt+K" />
+        <KeyBinding Gesture="Alt+K" Command="{Binding ChannelSelectedMoveCommand}" CommandParameter="Alt+K" />
         <!-- Grid選択アイテムの下移動 -->
-        <KeyBinding Gesture="Alt+J" Command="{Binding KeyCommand}" CommandParameter="Alt+J" />
+        <KeyBinding Gesture="Alt+J" Command="{Binding ChannelSelectedMoveCommand}" CommandParameter="Alt+J" />
         <!-- タブの切り替え← -->
-        <KeyBinding Gesture="Ctrl+PageUp" Command="{Binding KeyCommand}" CommandParameter="Ctrl+PageUp" />
-        <KeyBinding Gesture="Ctrl+Shift+F6" Command="{Binding KeyCommand}" CommandParameter="Ctrl+Shift+F6" />
-        <KeyBinding Gesture="Ctrl+Shift+Tab" Command="{Binding KeyCommand}" CommandParameter="Ctrl+Shift+Tab" />
-        <KeyBinding Gesture="Alt+H" Command="{Binding KeyCommand}" CommandParameter="Alt+H" />
+        <KeyBinding Gesture="Ctrl+PageUp" Command="{Binding TunerSelectedMoveCommand}" CommandParameter="Ctrl+PageUp" />
+        <KeyBinding Gesture="Ctrl+Shift+F6" Command="{Binding TunerSelectedMoveCommand}" CommandParameter="Ctrl+Shift+F6" />
+        <KeyBinding Gesture="Ctrl+Shift+Tab" Command="{Binding TunerSelectedMoveCommand}" CommandParameter="Ctrl+Shift+Tab" />
+        <KeyBinding Gesture="Alt+H" Command="{Binding TunerSelectedMoveCommand}" CommandParameter="Alt+H" />
         <!-- タブの切り替え→ -->
-        <KeyBinding Gesture="Ctrl+PageDown" Command="{Binding KeyCommand}" CommandParameter="Ctrl+PageDown" />
-        <KeyBinding Gesture="Ctrl+F6" Command="{Binding KeyCommand}" CommandParameter="Ctrl+F6" />
-        <KeyBinding Gesture="Ctrl+Tab" Command="{Binding KeyCommand}" CommandParameter="Ctrl+Tab" />
-        <KeyBinding Gesture="Alt+L" Command="{Binding KeyCommand}" CommandParameter="Alt+L" />
+        <KeyBinding Gesture="Ctrl+PageDown" Command="{Binding TunerSelectedMoveCommand}" CommandParameter="Ctrl+PageDown" />
+        <KeyBinding Gesture="Ctrl+F6" Command="{Binding TunerSelectedMoveCommand}" CommandParameter="Ctrl+F6" />
+        <KeyBinding Gesture="Ctrl+Tab" Command="{Binding TunerSelectedMoveCommand}" CommandParameter="Ctrl+Tab" />
+        <KeyBinding Gesture="Alt+L" Command="{Binding TunerSelectedMoveCommand}" CommandParameter="Alt+L" />
         <!-- 各項目の選択 -->
         <KeyBinding Gesture="Alt+1" Command="{Binding SelectedEditControlCommand}" CommandParameter="Alt+1" />
         <KeyBinding Gesture="Alt+2" Command="{Binding SelectedEditControlCommand}" CommandParameter="Alt+2" />
@@ -119,6 +119,10 @@
         <KeyBinding Gesture="Alt+8" Command="{Binding SelectedEditControlCommand}" CommandParameter="Alt+8" />
         <!-- 編集系 -->
         <KeyBinding Gesture="Ctrl+Alt+C" Command="{Binding KeyCommand}" CommandParameter="Ctrl+Alt+C" />
+        <!-- チャンネル編集 -->
+        <KeyBinding Gesture="Ctrl+Shift+K" Command="{Binding ChannelCommand}" CommandParameter="Ctrl+Shift+K" />
+        <KeyBinding Gesture="Ctrl+Shift+J" Command="{Binding ChannelCommand}" CommandParameter="Ctrl+Shift+J" />
+        <KeyBinding Gesture="Ctrl+Shift+D" Command="{Binding ChannelCommand}" CommandParameter="Ctrl+Shift+D" />
     </Window.InputBindings>
 
     <!-- 画面 -->
@@ -133,16 +137,25 @@
                 <MenuItem Header="_Close" />
             </MenuItem>
             <MenuItem Header="_Edit">
-                <MenuItem Header="_Undo" />
-                <MenuItem Header="_Redo" />
+                <MenuItem Header="_Undo" Visibility="Hidden" />
+                <MenuItem Header="_Redo" Visibility="Hidden" />
                 <Separator />
                 <MenuItem Header="_Channel">
                     <MenuItem Header="Up _Move" />
                     <MenuItem Header="Down _Move" />
                     <Separator/>
-                    <MenuItem Header="_Add top" />
-                    <MenuItem Header="_Add bottom" />
-                    <MenuItem Header="_Delete Select" />
+                    <MenuItem Header="_Add top"
+                          InputGestureText="Ctrl+Shift+K"
+                          Command="{Binding ChannelCommand}"
+                          CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InputGestureText}" />
+                    <MenuItem Header="_Add bottom"
+                          InputGestureText="Ctrl+Shift+J"
+                          Command="{Binding ChannelCommand}"
+                          CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InputGestureText}" />
+                    <MenuItem Header="_Delete Select"
+                          InputGestureText="Ctrl+Shift+D"
+                          Command="{Binding ChannelCommand}"
+                          CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InputGestureText}" />
                     <Separator />
                     <MenuItem Header="_Copy Write Channels"
                           InputGestureText="Ctrl+Alt+C"

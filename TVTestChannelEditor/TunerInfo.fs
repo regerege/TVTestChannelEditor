@@ -98,6 +98,8 @@ type ChannelInfo(channelName,tunerID,transportID,remoteControlNumber,serviceID,n
             <| _networkID
             <| _transportStreamID
             <| (if _enabled then 1 else 0)
+    /// 空のチャンネル情報を作成する。
+    static member Create() = new ChannelInfo("",0,0,0,0,0,0,false)
 
 /// チューナ情報
 type TunerInfo(tunerName) =
