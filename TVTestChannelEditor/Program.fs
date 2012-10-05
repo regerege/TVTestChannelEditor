@@ -11,6 +11,48 @@ open System.Windows.Input
 open System.IO
 open TVTestChannelEditor
 
+/// コピー先チューナー選択画面
+type SelectionTunerModel(tuners:TunerList) as x =
+    /// 親画面で選択中のチューナー
+    let mutable _tuner : TunerInfo = new TunerInfo("")
+    /// 選択チューナー以外のチューナー配列
+    let mutable _tunerArr : TunerInfo[] = Array.empty
+    /// 選択アイテム
+    let mutable _items : TunerInfo[] = Array.empty
+    
+    // コントロール
+    let _wpf = Application.LoadComponent(new Uri("SelectionTuner.xaml", System.UriKind.Relative)) :?> Window
+    let _lvtuners = _wpf.FindName("livTuners") :?> ListView
+    let _button = _wpf.FindName("btnSelected") :?> Button
+
+    /// コンストラクタ
+    do
+        _button.Click.Add(fun _ ->
+            if 0 < _lvtuners.SelectedItems.Count then
+                _items <- [| for o in _lvtuners.SelectedItems -> o :?> TunerInfo |]
+            _wpf.Close())
+        _lvtuners.Focus() |> ignore
+        _wpf.DataContext <- x
+
+    /// 選択リスト用チューナーリストの設定または取得
+    member x.Tuners = _tunerArr
+    /// 選択中のチューナー
+    member x.SelectTuner
+        with get() : TunerInfo = _tuner
+        and set v =
+            _tuner <- v
+            let name = v.TunerName
+            let tunerType = name.[0]
+            let list =
+                tuners.Tuners
+                |> Seq.filter(fun t -> t <> v && t.TunerName.[0] = tunerType)
+                |> Seq.toArray
+            _tunerArr <- list
+    /// 選択チューナーリスト
+    member x.SelectTuners = _items
+    /// 画面インスタンスを取得
+    member x.Window = _wpf
+
 type ChannelEditorModel(wpf:Window) as x =
     inherit ViewModelBase()
 
@@ -78,12 +120,29 @@ type ChannelEditorModel(wpf:Window) as x =
                 match gt with
                 | "Ctrl+S" -> _tuners.Save("test.ch2")
                 | "Ctrl+Alt+C" ->
+                    let subwind = new SelectionTunerModel(_tuners)
+                    subwind.Window.Owner <- wpf
                     let f = x.SelectedTabIndex
-                    //画面に渡すパラメータ
-                    //"([S|T])(\d+)" これでマッチして、(index, tunername) のリストを渡す？
-//                    let t = //画面作成後(複数選択可能)
-                    x.Tuners.[0].CopyWriteChannels(x.Tuners.[2], 2)
-                    x.SelectedTabIndex <- 2
+                    let st = x.Tuners.[f]
+                    let nm = st.TunerName
+                    subwind.SelectTuner <- st
+                    let b = subwind.Window.ShowDialog()
+                    if b.HasValue || b.Value then
+                        let tuners = subwind.SelectTuners
+                        if 0 < tuners.Length then
+                            tuners
+                            |> Array.iter (fun t ->
+                                st.CopyWriteChannels
+                                    <| (t,t.Channels.[0].TunerID)
+                            )
+                            let tuners =
+                                tuners
+                                |> Array.fold(fun s t ->
+                                    s
+                                    + (if String.IsNullOrEmpty(s) then "" else ", ")
+                                    + t.TunerName) ""
+                            MessageBox.Show(sprintf "%s から %s にチャンネルリスト複製しました。" nm tuners)
+                            |> ignore
                 | _ -> ())
     /// チャンネルの追加と削除と移動
     member x.ChannelCommand =
@@ -133,29 +192,10 @@ type ChannelEditorModel(wpf:Window) as x =
                 if gt.StartsWith("Alt+") && t.Length = 1 then
                     _editControls.[(int t) - 1].Focus() |> ignore)
 
-/// コピー先チューナー選択画面
-type SelectionTunerModel(tuners:TunerList, selectTuner:TunerInfo) =
-    inherit ViewModelBase()
-
-    let _wpf = Application.LoadComponent(new Uri("SelectionTuner.xaml", System.UriKind.Relative)) :?> Window
-    let _lvi = _wpf.FindName("livTuners") :?> ListView
-    let _button = _wpf.FindName("btnSelected") :?> Button
-
-    do
-        let name = selectTuner.TunerName
-        let tunerType = name.[0]
-        let list =
-            tuners.Tuners
-            |> Seq.filter(fun t -> t <> selectTuner && t.TunerName.[0] = tunerType)
-            |> Seq.toArray
-        _lvi.ItemsSource <- list
-
-
 module Program =
     [<STAThread>]
     [<EntryPoint>]
     let run(_) =
-
         // TextBoxがフォーカスを受け取ると全選択する
         EventManager.RegisterClassHandler(
             typeof<TextBox>,

@@ -45,7 +45,7 @@
     <Compile Include="Program.fs" />
     <None Include="TVTestChannelEditor.snk" />
     <Resource Include="ChannelEditor.xaml" />
-    <None Include="SelectionTuner.xaml" />
+    <Resource Include="SelectionTuner.xaml" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Accessibility" />
