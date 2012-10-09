@@ -94,8 +94,12 @@
 
     <!-- ショートカットキー -->
     <Window.InputBindings>
-        <!-- 保存 -->
+        <!-- 保存と開く -->
+        <KeyBinding Gesture="Ctrl+O" Command="{Binding KeyCommand}" CommandParameter="Ctrl+O" />
         <KeyBinding Gesture="Ctrl+S" Command="{Binding KeyCommand}" CommandParameter="Ctrl+S" />
+        <!-- フォーカス移動 -->
+        <KeyBinding Gesture="F6" Command="{Binding FoucsControlCommand}" CommandParameter="F6" />
+        <KeyBinding Gesture="F7" Command="{Binding FoucsControlCommand}" CommandParameter="F7" />
         <!-- Grid選択アイテムの移動 -->
         <KeyBinding Gesture="Alt+K" Command="{Binding ChannelSelectedMoveCommand}" CommandParameter="Alt+K" />
         <KeyBinding Gesture="Alt+J" Command="{Binding ChannelSelectedMoveCommand}" CommandParameter="Alt+J" />
@@ -136,6 +140,10 @@
         <!-- メニュー -->
         <Menu Name="mainMenu" HorizontalAlignment="Stretch" VerticalAlignment="Top" DockPanel.Dock="Top" Height="23">
             <MenuItem Header="_File">
+                <MenuItem Header="_Open"
+                          InputGestureText="Ctrl+O"
+                          Command="{Binding KeyCommand}"
+                          CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InputGestureText}" />
                 <MenuItem Header="_Save"
                           InputGestureText="Ctrl+S"
                           Command="{Binding KeyCommand}"

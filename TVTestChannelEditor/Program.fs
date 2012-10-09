@@ -10,6 +10,7 @@ open System.Windows.Media
 open System.Windows.Input
 open System.IO
 open TVTestChannelEditor
+open Microsoft.Win32        // ダイアログ用
 
 /// コピー先チューナー選択画面
 type SelectionTunerModel(tuners:TunerList, title) as x =
@@ -70,7 +71,7 @@ type SelectionTunerModel(tuners:TunerList, title) as x =
 type ChannelEditorModel(wpf:Window) as x =
     inherit ViewModelBase()
 
-    let mutable _tuners = TunerList.ReadConfig(@"..\..\BonDriver_ptmr.ch2")
+    let mutable _tuners : TunerList = Unchecked.defaultof<TunerList>
     let mutable _selectedTabIndex = -1
     let mutable _selectedIndex = -1
     let mutable _selectedChannle = ChannelInfo.Create()
@@ -91,26 +92,34 @@ type ChannelEditorModel(wpf:Window) as x =
         ]
     let mutable _editGrid : DataGrid = null
 
-    /// コンストラクタ
-    do
+    /// 初期化処理
+    let init() =
         // デフォルト選択アイテム
         x.SelectedChannel <- x.Tuners.[0].Channels.[0]
+    do
         // TabControl.SelectionChangedイベント
         _tabTuner.SelectionChanged.Add(fun _ ->
             let c = Commons.GetChildElement _tabTuner typeof<DataGrid>
             if c.IsSome then _editGrid <- c.Value :?> DataGrid)
         // Window Loadedイベント
-        wpf.Loaded.Add(fun _ ->
+        wpf.DataContextChanged.Add(fun _ ->
             x.SelectedTabIndex <- 0
             x.SelectedIndex <- 0
             _editControls.[0].Focus() |> ignore)
-        // バインド
         wpf.DataContext <- x
 
     /// 読み込み後のチューナーリスト
-    member x.Tuners : ObservableCollection<TunerInfo> = _tuners.Tuners
+    member x.Tuners
+        with get() : ObservableCollection<TunerInfo> =
+            if _tuners = Unchecked.defaultof<TunerList> then null
+            else _tuners.Tuners
+        and set v =
+            _tuners <- v
+            x.OnPropertyChanged(<@ x.Tuners @>)
     /// 選択タブのTunerInfoを取得
-    member x.SelectedTuner : TunerInfo = _tuners.Tuners.[_selectedTabIndex]
+    member x.SelectedTuner : TunerInfo =
+        if x.Tuners = null then Unchecked.defaultof<TunerInfo>
+        else _tuners.Tuners.[_selectedTabIndex]
     /// 選択タブのChannelInfoのコレクションを取得
     member x.Channles : ObservableCollection<ChannelInfo> = x.SelectedTuner.Channels
     /// 表示中のDataGridを取得
@@ -142,6 +151,17 @@ type ChannelEditorModel(wpf:Window) as x =
             (fun o ->
                 let gt = o :?> string
                 match gt with
+                | "Ctrl+O" ->
+                    let asm = System.Reflection.Assembly.GetExecutingAssembly()
+                    let dir = Path.GetDirectoryName(asm.CodeBase)
+                    let ofd = new OpenFileDialog()
+                    ofd.InitialDirectory <- dir
+                    ofd.FileName <- "BonDriver_ptmr.ch2"
+                    ofd.DefaultExt <- "*.ch2"
+                    if ofd.ShowDialog().Value then
+                        let test = ofd.FileName
+                        x.Tuners <- TunerList.ReadConfig(ofd.FileName)
+                        init()
                 | "Ctrl+S" -> _tuners.Save("")
                 | "Ctrl+Alt+C" ->
                     x.CopyMergeTuner "コピー先チューナー選択画面"
@@ -203,6 +223,15 @@ type ChannelEditorModel(wpf:Window) as x =
                 let t = gt.Substring(4)
                 if gt.StartsWith("Alt+") && t.Length = 1 then
                     _editControls.[(int t) - 1].Focus() |> ignore)
+    member x.FoucsControlCommand =
+        Commons.CreateCommand (fun _ -> true)
+            (fun o ->
+                let gt = o :?> string
+                match gt with
+                | "F6" -> _editGrid.Focus()
+                | "F7" -> _editControls.Head.Focus()
+                | _ -> false
+                |> ignore)
     /// ウィンドウコマンド
     member x.YankChannelMoveCommand =
         Commons.CreateCommand
@@ -221,22 +250,14 @@ type ChannelEditorModel(wpf:Window) as x =
                         seq { for i in _editGrid.SelectedItems -> i :?> ChannelInfo }
                         |> Seq.fold(fun l a -> l@[a]) []
                 | _ ->
+                    // Yank情報を選択要素の上または下に挿入
                     let channels = x.Channles
-                    let max = channels.Count
-//                    let index =
-//                        if gt =  "Alt+P" then _selectedIndex + 1
-//                        else _selectedIndex
-                    _channelsYank
-                    |> List.scan(fun i s ->
-                        let t =
-                            seq { for i in x.Channles -> i }
-                            |> Seq.findIndex(fun a -> a = s)
-                        if i <> t then
-                            if gt =  "Alt+P" then channels.Move(t,i+1)
-                            else channels.Move(t,i)
-                        i + 1) _selectedIndex
-                    |> List.iter (fun _ -> ())
-                    _channelsYank <- List.empty
+                    _channelsYank |> Seq.iter(channels.Remove >> ignore)    // Moveは超面倒なので一端消す。
+                    // 削除後の座標で計算
+                    let index = _selectedIndex + if gt = "Alt+P" then 1 else 0
+                    let ins i y = channels.Insert(index + i, y)
+                    _channelsYank |> Seq.iteri ins      // 選択項目の上または下に順番に挿入
+                    _channelsYank <- List.empty         // yankをクリア
                 )
     /// コピーまたはマージ
     member x.CopyMergeTuner title msg ff =
