@@ -41,7 +41,6 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Commons.fs" />
     <Compile Include="TunerInfo.fs" />
-    <Compile Include="MenuItemCommands.fs" />
     <Compile Include="Program.fs" />
     <None Include="TVTestChannelEditor.snk" />
     <Resource Include="ChannelEditor.xaml" />

@@ -88,6 +88,14 @@ type ChannelInfo(channelName,tunerID,transportID,remoteControlNumber,serviceID,n
             x.NetworkID,
             x.TransportStreamID,
             x.Enabled)
+    member x.CopyTo (c:ChannelInfo) =
+        x.ChannelName <- c.ChannelName
+        x.TransportID <- c.TransportID
+        x.RemoteControlNumber <- c.RemoteControlNumber
+        x.ServiceID <- c.ServiceID
+        x.NetworkID <- c.NetworkID
+        x.TransportStreamID <- c.TransportStreamID
+        x.Enabled <- c.Enabled
     override x.ToString() =
         sprintf "%s,%d,%d,%d,,%d,%d,%d,%d"
             <| _channelName
@@ -102,34 +110,60 @@ type ChannelInfo(channelName,tunerID,transportID,remoteControlNumber,serviceID,n
     static member Create() = new ChannelInfo("",0,0,0,0,0,0,false)
 
 /// チューナ情報
-type TunerInfo(tunerName) =
+type TunerInfo(tunerName,index) =
     inherit ViewModelBase()
 
     let mutable _tunerName : string = tunerName
+    let mutable _tunerID = index
     let mutable _channels = new ObservableCollection<ChannelInfo>()
     
+    /// TunerInfoのオブジェクトを作成
+    new(name) =
+        TunerInfo(name,-1)
     /// チューナー名の取得または設定
     member x.TunerName
         with get() = _tunerName
         and set v =
             _tunerName <- v
             x.OnPropertyChanged(<@ x.TunerName @>)
+    /// チューナーIDの取得または設定
+    member x.TunerID
+        with get() = _tunerID
+        and set v =
+            _tunerID <- v
+            x.OnPropertyChanged(<@ x.TunerID @>)
     /// チャンネルリストの取得または設定
     member x.Channels
         with get() = _channels
         and set v =
             _channels <- v
             x.OnPropertyChanged(<@ x.Channels @>)
+
     /// チャンネルすべてのチューナーIDを一括を行う。
     member x.ChangeTunerNumber id =
         for c in x.Channels do c.TunerID <- id
-
+        _tunerID <- id
     /// 指定チューナへのチャンネルリストの複製上書きを行う
-    member x.CopyWriteChannels(tt:TunerInfo, index) =
+    member x.CopyWriteChannels(tt:TunerInfo) =
         if x.TunerName = tt.TunerName then failwith "同一チューナーにチャンネルをコピー出来ません。"
-        let arr = Array.init (x.Channels.Count) (fun i -> x.Channels.[i].CopyTo(index))
+        let arr = Array.init (x.Channels.Count) (fun i -> x.Channels.[i].CopyTo(_tunerID))
         let c = ObservableCollection<ChannelInfo>(arr)
         tt.Channels <- c
+    /// expを基準にマージする。
+    member x.MergeChannels (tuners:TunerInfo[]) (exp:ChannelInfo -> ChannelInfo -> bool) =
+        let ocs : ObservableCollection<ChannelInfo> = x.Channels
+        tuners |> Seq.iter(fun t -> //マージ先チューナ
+            let fcs : ObservableCollection<ChannelInfo> = t.Channels
+            let list =
+                ocs |> Seq.fold (fun l o ->
+                    let ret = fcs |> Seq.tryFind(exp o)     // 最初に見つけた要素のみマージする
+                    if ret.IsSome then
+                        ret.Value.CopyTo(o)
+                        l
+                    else l@[o.CopyTo(t.TunerID)]
+                ) []
+            list |> List.iter (fun c -> fcs.Add(c))
+        )
 
 /// チューナー用ライブラリ
 module TunerCommons =
@@ -170,8 +204,8 @@ type TunerList() =
     member x.Tuners
         with get() = _list
     /// チューナーを追加する。
-    member x.AddTuner(name) =
-        _tuner <- Some <| TunerInfo(name)
+    member x.AddTuner(index,name) =
+        _tuner <- Some <| TunerInfo(name,index)
         if _tuner.IsSome then
             _list.Add _tuner.Value
     /// 現在選択中のチューナーにチャンネルを追加する。
@@ -192,10 +226,10 @@ type TunerList() =
 
     /// 設定情報を保存する。
     member x.Save(path:string) =
-        let path =
+        let opath =
             if String.IsNullOrEmpty path then x.OriginalPath
             else Path.GetFullPath(path)
-        let _ = File.Exists path    // チェック処理として使える？
+        let _ = File.Exists opath    // チェック処理として使える？
         let temppath = Path.Combine(x.BasePath, "temp.ch2")
         let readFile path = new StreamWriter(path, false, SJIS)
         try
@@ -222,10 +256,10 @@ type TunerList() =
         | ex ->
             failwith "設定ファイルの書き込みに失敗しました。"
         try // ↓超ださい
-            let bkpath = path + ".bak"
+            let bkpath = opath + ".bak"
             if File.Exists bkpath then File.Delete bkpath
-            File.Move(path, bkpath)
-            File.Copy(temppath, path, true)
+            File.Move(opath, bkpath)
+            File.Copy(temppath, opath, true)
             File.Delete temppath
         with
         | _ -> ()
@@ -238,8 +272,8 @@ type TunerList() =
                 <| (fun s ->
                     s |> Seq.fold (fun (tuners:TunerList) line ->
                         match line with
-                        | TunerCommons.TunerLine (index, tn) ->
-                            tuners.AddTuner tn
+                        | TunerCommons.TunerLine a ->
+                            tuners.AddTuner a
                         | TunerCommons.ChannelLine ci ->
                             tuners.Add ci
                         | _ -> ()

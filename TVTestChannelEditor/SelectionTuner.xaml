@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
     WindowStartupLocation="CenterOwner"
-    Title="コピー先チューナー選択画面" Height="360" Width="480">
+    Title="{Binding Title}" Height="360" Width="480">
 
     <Window.Resources>
         <Style TargetType="ListViewItem">
@@ -30,6 +30,12 @@
             </Setter>
         </Style>
     </Window.Resources>
+
+    <!-- ショートカットキー -->
+    <Window.InputBindings>
+        <!-- 保存 -->
+        <KeyBinding Gesture="ESC" Command="{Binding KeyCommand}" CommandParameter="ESC" />
+    </Window.InputBindings>
 
     <StackPanel>
         <ListView Name="livTuners" Margin="10" Height="265" ItemsSource="{Binding Tuners}" />

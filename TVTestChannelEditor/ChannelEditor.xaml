@@ -26,7 +26,8 @@
                 Grid.Row="0"
                 HorizontalAlignment="Stretch"
                 AutoGenerateColumns="False"
-                SelectionMode="Single"
+                CanUserSortColumns="False"
+                SelectionMode="Extended"
                 IsSynchronizedWithCurrentItem="True"
                 ItemsSource="{Binding Channels}"
                 SelectedItem="{
@@ -95,10 +96,13 @@
     <Window.InputBindings>
         <!-- 保存 -->
         <KeyBinding Gesture="Ctrl+S" Command="{Binding KeyCommand}" CommandParameter="Ctrl+S" />
-        <!-- Grid選択アイテムの上移動 -->
+        <!-- Grid選択アイテムの移動 -->
         <KeyBinding Gesture="Alt+K" Command="{Binding ChannelSelectedMoveCommand}" CommandParameter="Alt+K" />
-        <!-- Grid選択アイテムの下移動 -->
         <KeyBinding Gesture="Alt+J" Command="{Binding ChannelSelectedMoveCommand}" CommandParameter="Alt+J" />
+        <!-- チャンネル移動 -->
+        <KeyBinding Gesture="Alt+Y" Command="{Binding YankChannelMoveCommand}" CommandParameter="Alt+Y" />
+        <KeyBinding Gesture="Alt+P" Command="{Binding YankChannelMoveCommand}" CommandParameter="Alt+P" />
+        <KeyBinding Gesture="Alt+Shift+P" Command="{Binding YankChannelMoveCommand}" CommandParameter="Alt+Shift+P" />
         <!-- タブの切り替え← -->
         <KeyBinding Gesture="Ctrl+PageUp" Command="{Binding TunerSelectedMoveCommand}" CommandParameter="Ctrl+PageUp" />
         <KeyBinding Gesture="Ctrl+Shift+F6" Command="{Binding TunerSelectedMoveCommand}" CommandParameter="Ctrl+Shift+F6" />
@@ -120,6 +124,7 @@
         <KeyBinding Gesture="Alt+8" Command="{Binding SelectedEditControlCommand}" CommandParameter="Alt+8" />
         <!-- 編集系 -->
         <KeyBinding Gesture="Ctrl+Alt+C" Command="{Binding KeyCommand}" CommandParameter="Ctrl+Alt+C" />
+        <KeyBinding Gesture="Ctrl+Alt+M" Command="{Binding KeyCommand}" CommandParameter="Ctrl+Alt+M" />
         <!-- チャンネル編集 -->
         <KeyBinding Gesture="Ctrl+Shift+K" Command="{Binding ChannelCommand}" CommandParameter="Ctrl+Shift+K" />
         <KeyBinding Gesture="Ctrl+Shift+J" Command="{Binding ChannelCommand}" CommandParameter="Ctrl+Shift+J" />
@@ -144,6 +149,18 @@
                 <MenuItem Header="_Channel">
                     <MenuItem Header="Up _Move" />
                     <MenuItem Header="Down _Move" />
+                    <MenuItem Header="Select Channels Yank"
+                          InputGestureText="Alt+Y"
+                          Command="{Binding YankChannelMoveCommand}"
+                          CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InputGestureText}" />
+                    <MenuItem Header="Yank Channels Insert Up"
+                          InputGestureText="Alt+Shift+P"
+                          Command="{Binding YankChannelMoveCommand}"
+                          CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InputGestureText}" />
+                    <MenuItem Header="Yank Channels Insert Down"
+                          InputGestureText="Alt+P"
+                          Command="{Binding YankChannelMoveCommand}"
+                          CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InputGestureText}" />
                     <Separator/>
                     <MenuItem Header="_Add top"
                           InputGestureText="Ctrl+Shift+K"
@@ -162,7 +179,10 @@
                           InputGestureText="Ctrl+Alt+C"
                           Command="{Binding KeyCommand}"
                           CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InputGestureText}" />
-                    <MenuItem Header="_Marge Channels" />
+                    <MenuItem Header="_Marge Channels"
+                          InputGestureText="Ctrl+Alt+M"
+                          Command="{Binding KeyCommand}"
+                          CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InputGestureText}" />
                 </MenuItem>
             </MenuItem>
         </Menu>
