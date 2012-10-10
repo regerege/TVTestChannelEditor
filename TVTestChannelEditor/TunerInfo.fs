@@ -6,8 +6,8 @@ open System.IO
 open System.Text
 open System.Text.RegularExpressions
 open Commons
+open StringCommon
 
-/// チャンネル情報
 /// <summary>チャンネル情報</summary>
 /// <param name="channelName">チャンネル番組名</param>
 /// <param name="tunerID">チューナー番号</param>
@@ -32,8 +32,8 @@ type ChannelInfo(channelName,tunerID,transportID,remoteControlNumber,serviceID,n
     /// チャンネル名の取得または設定
     member x.ChannelName
         with get() = _channelName
-        and set(v) =
-            _channelName <- v
+        and set(v:string) =
+            _channelName <- v.StrCnv()      // 全角に変換して
             x.OnPropertyChanged(<@ x.ChannelName @>)
     /// チューナー番号の取得または設定
     member x.TunerID

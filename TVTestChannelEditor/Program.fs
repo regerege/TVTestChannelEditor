@@ -9,7 +9,6 @@ open System.Windows.Markup
 open System.Windows.Media
 open System.Windows.Input
 open System.IO
-open TVTestChannelEditor
 open Microsoft.Win32        // ダイアログ用
 
 /// コピー先チューナー選択画面
