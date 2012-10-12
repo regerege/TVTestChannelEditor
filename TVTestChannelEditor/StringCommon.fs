@@ -213,7 +213,10 @@ module StringCommon =
                 match (a,b) with
                 | ('\000',b) -> l,[b]
                 | (a,'\000') -> l,[a]
-                | (a,b) -> l,[a;b;]
+                | (a,b) ->
+                    match (dfwtransfer (a,b)) with
+                    | Some d -> l,[d]
+                    | None -> l,[a;b;]
                 |> (fun (l,l2) ->
                     l2 |> List.map fwtransfer
                     |> List.append l
