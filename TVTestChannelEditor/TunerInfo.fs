@@ -146,7 +146,7 @@ type TunerInfo(tunerName,index) =
     /// 指定チューナへのチャンネルリストの複製上書きを行う
     member x.CopyWriteChannels(tt:TunerInfo) =
         if x.TunerName = tt.TunerName then failwith "同一チューナーにチャンネルをコピー出来ません。"
-        let arr = Array.init (x.Channels.Count) (fun i -> x.Channels.[i].CopyTo(_tunerID))
+        let arr = Array.init (x.Channels.Count) (fun i -> x.Channels.[i].CopyTo(tt.TunerID))
         let c = ObservableCollection<ChannelInfo>(arr)
         tt.Channels <- c
     /// expを基準にマージする。
