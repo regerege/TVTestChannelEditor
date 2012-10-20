@@ -100,6 +100,16 @@ type ChannelEditorModel(wpf:Window) as x =
         _tabTuner.SelectionChanged.Add(fun _ ->
             let c = Commons.GetChildElement _tabTuner typeof<DataGrid>
             if c.IsSome then _editGrid <- c.Value :?> DataGrid)
+        // ファイルのD&Dを許可
+        wpf.PreviewDragOver.Add(fun e ->
+            e.Handled <- e.Data.GetDataPresent DataFormats.FileDrop)
+        // ファイルのD&Dイベント
+        wpf.Drop.Add(fun e ->
+            let files = e.Data.GetData(DataFormats.FileDrop) :?> string[]
+            if files <> null then
+                x.Tuners <- TunerList.ReadConfig(files.[0])
+                init()
+            ())
         // Window Loadedイベント
         wpf.DataContextChanged.Add(fun _ ->
             x.SelectedTabIndex <- 0
@@ -158,7 +168,6 @@ type ChannelEditorModel(wpf:Window) as x =
                     ofd.FileName <- "BonDriver_ptmr.ch2"
                     ofd.DefaultExt <- "*.ch2"
                     if ofd.ShowDialog().Value then
-                        let test = ofd.FileName
                         x.Tuners <- TunerList.ReadConfig(ofd.FileName)
                         init()
                 | "Ctrl+S" -> _tuners.Save("")

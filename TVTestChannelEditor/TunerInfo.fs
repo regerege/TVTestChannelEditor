@@ -169,7 +169,7 @@ type TunerInfo(tunerName,index) =
 module TunerCommons =
     /// 設定ファイル読み込み用アクティブパターン
     let (|TunerLine|ChannelLine|NoneLine|) (line:string) =
-        let tuner = Regex.Match(line, "^;#SPACE\((\d+),([ST]\d+)\)$")
+        let tuner = Regex.Match(line, "^;#SPACE\((\d+),(.+)\)$")
         let channel = line.Split(',')
         if tuner.Success then
             TunerLine (Convert.ToInt32(tuner.Result("$1")), tuner.Result("$2"))
